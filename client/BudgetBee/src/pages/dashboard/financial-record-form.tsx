@@ -1,3 +1,4 @@
 export const FinancialRecordForm=() =>{
-    return <div> Record Form</div>;
+    return 
+    <div className="form-container"></div>;
 };
