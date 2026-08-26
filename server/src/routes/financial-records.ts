@@ -1,4 +1,8 @@
-import express, { Request, Response } from "express";
+import express, {
+  Request,
+  Response,
+} from "express";
+
 import FinancialRecordModel from "../schema/financial-record";
 
 const router = express.Router();
@@ -10,25 +14,33 @@ const router = express.Router();
 
 router.get(
   "/getAllByUserID/:userId",
-  async (req: Request, res: Response) => {
+  async (
+    req: Request,
+    res: Response
+  ) => {
     try {
-      const userId = req.params.userId as string;
+      const userId =
+        req.params.userId as string;
 
-      const records = await FinancialRecordModel.find({
-        userID: userId,
-      });
-
-      if (records.length === 0) {
-        return res.status(404).json({
-          message: "No financial records found",
+      const records =
+        await FinancialRecordModel.find({
+          userID: userId,
         });
-      }
 
-      return res.status(200).json(records);
+      // Returning [] is normal for a new user
+      return res
+        .status(200)
+        .json(records);
 
     } catch (error) {
+      console.error(
+        "GET records error:",
+        error
+      );
+
       return res.status(500).json({
-        message: "Internal Server Error",
+        message:
+          "Internal Server Error",
       });
     }
   }
@@ -41,23 +53,39 @@ router.get(
 
 router.get(
   "/getById/:id",
-  async (req: Request, res: Response) => {
+  async (
+    req: Request,
+    res: Response
+  ) => {
     try {
-      const id = req.params.id as string;
+      const id =
+        req.params.id as string;
 
-      const record = await FinancialRecordModel.findById(id);
+      const record =
+        await FinancialRecordModel.findById(
+          id
+        );
 
       if (!record) {
         return res.status(404).json({
-          message: "Financial record not found",
+          message:
+            "Financial record not found",
         });
       }
 
-      return res.status(200).json(record);
+      return res
+        .status(200)
+        .json(record);
 
     } catch (error) {
+      console.error(
+        "GET record error:",
+        error
+      );
+
       return res.status(500).json({
-        message: "Internal Server Error",
+        message:
+          "Internal Server Error",
       });
     }
   }
@@ -70,8 +98,15 @@ router.get(
 
 router.post(
   "/create",
-  async (req: Request, res: Response) => {
+  async (
+    req: Request,
+    res: Response
+  ) => {
     try {
+      console.log(
+        "POST received:",
+        req.body
+      );
 
       const {
         userID,
@@ -94,28 +129,44 @@ router.post(
         !paymentMethod
       ) {
         return res.status(400).json({
-          message: "Required fields are missing",
+          message:
+            "Required fields are missing",
         });
       }
 
-      const newRecord = new FinancialRecordModel({
-        userID,
-        description,
-        amount,
-        transactionType,
-        date,
-        category,
-        paymentMethod,
-        notes,
-      });
+      const newRecord =
+        new FinancialRecordModel({
+          userID,
+          description,
+          amount,
+          transactionType,
+          date,
+          category,
+          paymentMethod,
+          notes,
+        });
 
-      const savedRecord = await newRecord.save();
+      const savedRecord =
+        await newRecord.save();
 
-      return res.status(201).json(savedRecord);
+      console.log(
+        "Record saved to MongoDB:",
+        savedRecord
+      );
+
+      return res
+        .status(201)
+        .json(savedRecord);
 
     } catch (error) {
+      console.error(
+        "CREATE record error:",
+        error
+      );
+
       return res.status(500).json({
-        message: "Internal Server Error",
+        message:
+          "Internal Server Error",
       });
     }
   }
@@ -128,10 +179,13 @@ router.post(
 
 router.put(
   "/update/:id",
-  async (req: Request, res: Response) => {
+  async (
+    req: Request,
+    res: Response
+  ) => {
     try {
-
-      const id = req.params.id as string;
+      const id =
+        req.params.id as string;
 
       const {
         userID,
@@ -165,15 +219,24 @@ router.put(
 
       if (!updatedRecord) {
         return res.status(404).json({
-          message: "Financial record not found",
+          message:
+            "Financial record not found",
         });
       }
 
-      return res.status(200).json(updatedRecord);
+      return res
+        .status(200)
+        .json(updatedRecord);
 
     } catch (error) {
+      console.error(
+        "UPDATE record error:",
+        error
+      );
+
       return res.status(500).json({
-        message: "Internal Server Error",
+        message:
+          "Internal Server Error",
       });
     }
   }
@@ -186,27 +249,40 @@ router.put(
 
 router.delete(
   "/delete/:id",
-  async (req: Request, res: Response) => {
+  async (
+    req: Request,
+    res: Response
+  ) => {
     try {
-
-      const id = req.params.id as string;
+      const id =
+        req.params.id as string;
 
       const deletedRecord =
-        await FinancialRecordModel.findByIdAndDelete(id);
+        await FinancialRecordModel.findByIdAndDelete(
+          id
+        );
 
       if (!deletedRecord) {
         return res.status(404).json({
-          message: "Financial record not found",
+          message:
+            "Financial record not found",
         });
       }
 
       return res.status(200).json({
-        message: "Financial record deleted successfully",
+        message:
+          "Financial record deleted successfully",
       });
 
     } catch (error) {
+      console.error(
+        "DELETE record error:",
+        error
+      );
+
       return res.status(500).json({
-        message: "Internal Server Error",
+        message:
+          "Internal Server Error",
       });
     }
   }

@@ -1,16 +1,40 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 
-export const FinancialRecordForm = () => {
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
-  const [transactionType, setTransactionType] = useState("Expense");
-  const [date, setDate] = useState("");
-  const [category, setCategory] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState("");
-  const [notes, setNotes] = useState("");
+import { useFinancialRecordContext } from "../../contexts/financial-record-context";
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+export const FinancialRecordForm = () => {
+  const [description, setDescription] =
+    useState("");
+
+  const [amount, setAmount] =
+    useState("");
+
+  const [
+    transactionType,
+    setTransactionType,
+  ] = useState("Expense");
+
+  const [date, setDate] =
+    useState("");
+
+  const [category, setCategory] =
+    useState("");
+
+  const [
+    paymentMethod,
+    setPaymentMethod,
+  ] = useState("");
+
+  const [notes, setNotes] =
+    useState("");
+
+  const { addRecord } =
+    useFinancialRecordContext();
+
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
 
     if (
@@ -24,19 +48,35 @@ export const FinancialRecordForm = () => {
     }
 
     const newRecord = {
-      id: crypto.randomUUID(),
-      description: description.trim(),
-      amount: Number(amount),
+      description:
+        description.trim(),
+
+      amount:
+        Number(amount),
+
       transactionType,
+
       date,
+
       category,
+
       paymentMethod,
-      notes: notes.trim(),
+
+      notes:
+        notes.trim(),
     };
 
-    console.log("New Financial Record:", newRecord);
+    const success =
+      await addRecord(newRecord);
 
-    // Reset form
+    if (!success) {
+      alert(
+        "Could not save the financial record."
+      );
+
+      return;
+    }
+
     setDescription("");
     setAmount("");
     setTransactionType("Expense");
@@ -51,9 +91,11 @@ export const FinancialRecordForm = () => {
       <h2>Add Financial Record</h2>
 
       <form onSubmit={handleSubmit}>
-        {/* Description */}
+
         <div className="form-field">
-          <label htmlFor="description">Description</label>
+          <label htmlFor="description">
+            Description
+          </label>
 
           <input
             id="description"
@@ -62,13 +104,18 @@ export const FinancialRecordForm = () => {
             required
             className="form-input"
             value={description}
-            onChange={(event) => setDescription(event.target.value)}
+            onChange={(event) =>
+              setDescription(
+                event.target.value
+              )
+            }
           />
         </div>
 
-        {/* Amount */}
         <div className="form-field">
-          <label htmlFor="amount">Amount</label>
+          <label htmlFor="amount">
+            Amount
+          </label>
 
           <input
             id="amount"
@@ -79,29 +126,44 @@ export const FinancialRecordForm = () => {
             required
             className="form-input"
             value={amount}
-            onChange={(event) => setAmount(event.target.value)}
+            onChange={(event) =>
+              setAmount(
+                event.target.value
+              )
+            }
           />
         </div>
 
-        {/* Transaction Type */}
         <div className="form-field">
-          <label htmlFor="transactionType">Transaction Type</label>
+          <label htmlFor="transactionType">
+            Transaction Type
+          </label>
 
           <select
             id="transactionType"
             required
             className="form-input"
             value={transactionType}
-            onChange={(event) => setTransactionType(event.target.value)}
+            onChange={(event) =>
+              setTransactionType(
+                event.target.value
+              )
+            }
           >
-            <option value="Expense">Expense</option>
-            <option value="Income">Income</option>
+            <option value="Expense">
+              Expense
+            </option>
+
+            <option value="Income">
+              Income
+            </option>
           </select>
         </div>
 
-        {/* Date */}
         <div className="form-field">
-          <label htmlFor="date">Date</label>
+          <label htmlFor="date">
+            Date
+          </label>
 
           <input
             id="date"
@@ -109,60 +171,136 @@ export const FinancialRecordForm = () => {
             required
             className="form-input"
             value={date}
-            onChange={(event) => setDate(event.target.value)}
+            onChange={(event) =>
+              setDate(
+                event.target.value
+              )
+            }
           />
         </div>
 
-        {/* Category */}
         <div className="form-field">
-          <label htmlFor="category">Category</label>
+          <label htmlFor="category">
+            Category
+          </label>
 
           <select
             id="category"
             required
             className="form-input"
             value={category}
-            onChange={(event) => setCategory(event.target.value)}
+            onChange={(event) =>
+              setCategory(
+                event.target.value
+              )
+            }
           >
-            <option value="">Select a Category</option>
-            <option value="Food">Food</option>
-            <option value="Rent">Rent</option>
-            <option value="Shopping">Shopping</option>
-            <option value="Transportation">Transportation</option>
-            <option value="Utilities">Utilities</option>
-            <option value="Entertainment">Entertainment</option>
-            <option value="Healthcare">Healthcare</option>
-            <option value="Education">Education</option>
-            <option value="Salary">Salary</option>
-            <option value="Investment">Investment</option>
-            <option value="Other">Other</option>
+            <option value="">
+              Select a Category
+            </option>
+
+            <option value="Food">
+              Food
+            </option>
+
+            <option value="Rent">
+              Rent
+            </option>
+
+            <option value="Shopping">
+              Shopping
+            </option>
+
+            <option value="Transportation">
+              Transportation
+            </option>
+
+            <option value="Utilities">
+              Utilities
+            </option>
+
+            <option value="Entertainment">
+              Entertainment
+            </option>
+
+            <option value="Healthcare">
+              Healthcare
+            </option>
+
+            <option value="Education">
+              Education
+            </option>
+
+            <option value="Salary">
+              Salary
+            </option>
+
+            <option value="Investment">
+              Investment
+            </option>
+
+            <option value="Other">
+              Other
+            </option>
           </select>
         </div>
 
-        {/* Payment Method */}
         <div className="form-field">
-          <label htmlFor="paymentMethod">Payment Method</label>
+          <label htmlFor="paymentMethod">
+            Payment Method
+          </label>
 
           <select
             id="paymentMethod"
             required
             className="form-input"
             value={paymentMethod}
-            onChange={(event) => setPaymentMethod(event.target.value)}
+            onChange={(event) =>
+              setPaymentMethod(
+                event.target.value
+              )
+            }
           >
-            <option value="">Select a Payment Method</option>
-            <option value="Cash">Cash</option>
-            <option value="Credit Card">Credit Card</option>
-            <option value="Debit Card">Debit Card</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-            <option value="Mobile Banking">Mobile Banking</option>
-            <option value="Digital Wallet">Digital Wallet</option>
+            <option value="">
+              Select a Payment Method
+            </option>
+
+            <option value="Cash">
+              Cash
+            </option>
+
+            <option value="Credit Card">
+              Credit Card
+            </option>
+
+            <option value="Debit Card">
+              Debit Card
+            </option>
+
+            <option value="Bank Transfer">
+              Bank Transfer
+            </option>
+
+            <option value="Mobile Banking">
+              Mobile Banking
+            </option>
+
+            <optgroup label="Digital Wallet">
+              <option value="bKash">
+                bKash
+              </option>
+
+              <option value="Nagad">
+                Nagad
+              </option>
+            </optgroup>
           </select>
         </div>
 
-        {/* Notes */}
         <div className="form-field">
-          <label htmlFor="notes">Notes</label>
+          <label htmlFor="notes">
+            Notes
+          </label>
 
           <textarea
             id="notes"
@@ -171,11 +309,18 @@ export const FinancialRecordForm = () => {
             rows={3}
             maxLength={250}
             value={notes}
-            onChange={(event) => setNotes(event.target.value)}
+            onChange={(event) =>
+              setNotes(
+                event.target.value
+              )
+            }
           />
         </div>
 
-        <button type="submit" className="button">
+        <button
+          type="submit"
+          className="button"
+        >
           Add Record
         </button>
       </form>
