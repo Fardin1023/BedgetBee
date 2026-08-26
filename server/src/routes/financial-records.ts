@@ -1,110 +1,97 @@
-import express, {
-  Request,
-  Response,
-} from "express";
-
+import { Router } from "express";
 import FinancialRecordModel from "../schema/financial-record";
 
-const router = express.Router();
+const router = Router();
 
-
-// ==============================
-// GET ALL RECORDS BY USER ID
-// ==============================
+/* ============================= */
+/* GET ALL RECORDS BY USER ID    */
+/* ============================= */
 
 router.get(
   "/getAllByUserID/:userId",
-  async (
-    req: Request,
-    res: Response
-  ) => {
+  async (req, res) => {
     try {
-      const userId =
-        req.params.userId as string;
+      const { userId } = req.params;
 
       const records =
-        await FinancialRecordModel.find({
-          userID: userId,
-        });
+        await FinancialRecordModel
+          .find({
+            userID: userId,
+          })
+          .sort({
+            date: -1,
+          });
 
-      // Returning [] is normal for a new user
       return res
         .status(200)
         .json(records);
-
     } catch (error) {
       console.error(
         "GET records error:",
         error
       );
 
-      return res.status(500).json({
-        message:
-          "Internal Server Error",
-      });
+      return res
+        .status(500)
+        .json({
+          message:
+            "Failed to fetch financial records.",
+        });
     }
   }
 );
 
-
-// ==============================
-// GET ONE RECORD BY ID
-// ==============================
+/* ============================= */
+/* GET ONE RECORD                */
+/* ============================= */
 
 router.get(
   "/getById/:id",
-  async (
-    req: Request,
-    res: Response
-  ) => {
+  async (req, res) => {
     try {
-      const id =
-        req.params.id as string;
-
       const record =
         await FinancialRecordModel.findById(
-          id
+          req.params.id
         );
 
       if (!record) {
-        return res.status(404).json({
-          message:
-            "Financial record not found",
-        });
+        return res
+          .status(404)
+          .json({
+            message:
+              "Financial record not found.",
+          });
       }
 
       return res
         .status(200)
         .json(record);
-
     } catch (error) {
       console.error(
         "GET record error:",
         error
       );
 
-      return res.status(500).json({
-        message:
-          "Internal Server Error",
-      });
+      return res
+        .status(500)
+        .json({
+          message:
+            "Failed to fetch financial record.",
+        });
     }
   }
 );
 
-
-// ==============================
-// CREATE FINANCIAL RECORD
-// ==============================
+/* ============================= */
+/* CREATE RECORD                 */
+/* ============================= */
 
 router.post(
   "/create",
-  async (
-    req: Request,
-    res: Response
-  ) => {
+  async (req, res) => {
     try {
       console.log(
-        "POST received:",
+        "BODY RECEIVED:",
         req.body
       );
 
@@ -114,103 +101,188 @@ router.post(
         amount,
         transactionType,
         date,
+
+        // Expense only
         category,
         paymentMethod,
+
+        // Income only
+        incomeType,
+
+        // Optional
         notes,
       } = req.body;
+
+      /* COMMON REQUIRED FIELDS */
 
       if (
         !userID ||
         !description ||
         amount === undefined ||
         !transactionType ||
-        !date ||
-        !category ||
-        !paymentMethod
+        !date
       ) {
-        return res.status(400).json({
-          message:
-            "Required fields are missing",
-        });
+        return res
+          .status(400)
+          .json({
+            message:
+              "Missing required transaction information.",
+          });
+      }
+
+      const numericAmount =
+        Number(amount);
+
+      if (
+        Number.isNaN(
+          numericAmount
+        ) ||
+        numericAmount <= 0
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "Amount must be greater than zero.",
+          });
+      }
+
+      /* TRANSACTION TYPE */
+
+      if (
+        transactionType !==
+          "Income" &&
+        transactionType !==
+          "Expense"
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "Invalid transaction type.",
+          });
+      }
+
+      /* INCOME VALIDATION */
+
+      if (
+        transactionType ===
+          "Income" &&
+        !incomeType
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "Income type is required for income transactions.",
+          });
+      }
+
+      /* EXPENSE VALIDATION */
+
+      if (
+        transactionType ===
+          "Expense" &&
+        (
+          !category ||
+          !paymentMethod
+        )
+      ) {
+        return res
+          .status(400)
+          .json({
+            message:
+              "Category and payment method are required for expense transactions.",
+          });
       }
 
       const newRecord =
         new FinancialRecordModel({
           userID,
-          description,
-          amount,
+
+          description:
+            String(
+              description
+            ).trim(),
+
+          amount:
+            numericAmount,
+
           transactionType,
-          date,
-          category,
-          paymentMethod,
-          notes,
+
+          date:
+            new Date(date),
+
+          category:
+            transactionType ===
+            "Expense"
+              ? category
+              : undefined,
+
+          paymentMethod:
+            transactionType ===
+            "Expense"
+              ? paymentMethod
+              : undefined,
+
+          incomeType:
+            transactionType ===
+            "Income"
+              ? incomeType
+              : undefined,
+
+          notes:
+            notes
+              ? String(
+                  notes
+                ).trim()
+              : undefined,
         });
 
       const savedRecord =
         await newRecord.save();
 
       console.log(
-        "Record saved to MongoDB:",
+        "SAVED RECORD:",
         savedRecord
       );
 
       return res
         .status(201)
         .json(savedRecord);
-
     } catch (error) {
       console.error(
-        "CREATE record error:",
+        "CREATE RECORD ERROR:",
         error
       );
 
-      return res.status(500).json({
-        message:
-          "Internal Server Error",
-      });
+      return res
+        .status(500)
+        .json({
+          message:
+            "Failed to create financial record.",
+
+          error:
+            error instanceof Error
+              ? error.message
+              : String(error),
+        });
     }
   }
 );
 
-
-// ==============================
-// UPDATE FINANCIAL RECORD
-// ==============================
+/* ============================= */
+/* UPDATE RECORD                 */
+/* ============================= */
 
 router.put(
   "/update/:id",
-  async (
-    req: Request,
-    res: Response
-  ) => {
+  async (req, res) => {
     try {
-      const id =
-        req.params.id as string;
-
-      const {
-        userID,
-        description,
-        amount,
-        transactionType,
-        date,
-        category,
-        paymentMethod,
-        notes,
-      } = req.body;
-
       const updatedRecord =
         await FinancialRecordModel.findByIdAndUpdate(
-          id,
-          {
-            userID,
-            description,
-            amount,
-            transactionType,
-            date,
-            category,
-            paymentMethod,
-            notes,
-          },
+          req.params.id,
+          req.body,
           {
             new: true,
             runValidators: true,
@@ -218,75 +290,75 @@ router.put(
         );
 
       if (!updatedRecord) {
-        return res.status(404).json({
-          message:
-            "Financial record not found",
-        });
+        return res
+          .status(404)
+          .json({
+            message:
+              "Financial record not found.",
+          });
       }
 
       return res
         .status(200)
         .json(updatedRecord);
-
     } catch (error) {
       console.error(
         "UPDATE record error:",
         error
       );
 
-      return res.status(500).json({
-        message:
-          "Internal Server Error",
-      });
+      return res
+        .status(500)
+        .json({
+          message:
+            "Failed to update financial record.",
+        });
     }
   }
 );
 
-
-// ==============================
-// DELETE FINANCIAL RECORD
-// ==============================
+/* ============================= */
+/* DELETE RECORD                 */
+/* ============================= */
 
 router.delete(
   "/delete/:id",
-  async (
-    req: Request,
-    res: Response
-  ) => {
+  async (req, res) => {
     try {
-      const id =
-        req.params.id as string;
-
       const deletedRecord =
         await FinancialRecordModel.findByIdAndDelete(
-          id
+          req.params.id
         );
 
       if (!deletedRecord) {
-        return res.status(404).json({
-          message:
-            "Financial record not found",
-        });
+        return res
+          .status(404)
+          .json({
+            message:
+              "Financial record not found.",
+          });
       }
 
-      return res.status(200).json({
-        message:
-          "Financial record deleted successfully",
-      });
-
+      return res
+        .status(200)
+        .json({
+          message:
+            "Financial record deleted successfully.",
+        });
     } catch (error) {
       console.error(
         "DELETE record error:",
         error
       );
 
-      return res.status(500).json({
-        message:
-          "Internal Server Error",
-      });
+      return res
+        .status(500)
+        .json({
+          message:
+            "Failed to delete financial record.",
+        });
     }
   }
 );
-
 
 export default router;

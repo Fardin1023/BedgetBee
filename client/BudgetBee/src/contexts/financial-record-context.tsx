@@ -7,26 +7,56 @@ import {
   useState,
 } from "react";
 
-import type { ReactNode } from "react";
-import { useUser } from "@clerk/react";
+import type {
+  ReactNode,
+} from "react";
 
-interface FinancialRecord {
+import {
+  useUser,
+} from "@clerk/react";
+
+export interface FinancialRecord {
   _id?: string;
+
   userID?: string;
+
   description: string;
+
   amount: number;
-  transactionType: string;
+
+  transactionType:
+    | "Income"
+    | "Expense";
+
   date: string;
-  category: string;
-  paymentMethod: string;
+
+  /*
+    Expense-only fields
+  */
+  category?: string;
+
+  paymentMethod?: string;
+
+  /*
+    Income-only field
+  */
+  incomeType?: string;
+
+  /*
+    Optional for both
+  */
   notes?: string;
 }
 
 interface FinancialRecordContextType {
-  records: FinancialRecord[];
+  records:
+    FinancialRecord[];
 
   addRecord: (
-    record: Omit<FinancialRecord, "_id" | "userID">
+    record: Omit<
+      FinancialRecord,
+      "_id" | "userID"
+    >
   ) => Promise<boolean>;
 
   updateRecord: (
@@ -44,7 +74,8 @@ interface FinancialRecordContextType {
 
 export const FinancialRecordContext =
   createContext<
-    FinancialRecordContextType | undefined
+    FinancialRecordContextType
+    | undefined
   >(undefined);
 
 export const FinancialRecordProvider = ({
@@ -52,199 +83,287 @@ export const FinancialRecordProvider = ({
 }: {
   children: ReactNode;
 }) => {
-  const [records, setRecords] =
-    useState<FinancialRecord[]>([]);
+  const [
+    records,
+    setRecords,
+  ] =
+    useState<
+      FinancialRecord[]
+    >([]);
 
-  const { isLoaded, isSignedIn, user } =
+  const {
+    isLoaded,
+    isSignedIn,
+    user,
+  } =
     useUser();
 
   const userId =
-    isLoaded && isSignedIn
+    isLoaded &&
+    isSignedIn
       ? user.id
       : undefined;
 
-  // ==============================
-  // GET RECORDS
-  // ==============================
+  /*
+    ==========================
+    FETCH ALL USER RECORDS
+    ==========================
+  */
 
   useEffect(() => {
     if (!userId) {
       return;
     }
 
-    const fetchRecords = async () => {
+    const fetchRecords =
+      async () => {
+        try {
+          const response =
+            await fetch(
+              `http://localhost:3001/financial-records/getAllByUserID/${userId}`
+            );
+
+          if (
+            !response.ok
+          ) {
+            throw new Error(
+              "Failed to fetch financial records"
+            );
+          }
+
+          const data:
+            FinancialRecord[] =
+            await response.json();
+
+          setRecords(
+            data
+          );
+        } catch (
+          error
+        ) {
+          console.error(
+            "Error fetching records:",
+            error
+          );
+        }
+      };
+
+    void fetchRecords();
+  }, [
+    userId,
+  ]);
+
+  /*
+    ==========================
+    ADD RECORD
+    ==========================
+  */
+
+  const addRecord =
+    async (
+      record: Omit<
+        FinancialRecord,
+        "_id" | "userID"
+      >
+    ): Promise<boolean> => {
+      if (!userId) {
+        return false;
+      }
+
       try {
-        const response = await fetch(
-          `http://localhost:3001/financial-records/getAllByUserID/${userId}`
+        const response =
+          await fetch(
+            "http://localhost:3001/financial-records/create",
+            {
+              method:
+                "POST",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+
+              body:
+                JSON.stringify({
+                  ...record,
+
+                  userID:
+                    userId,
+                }),
+            }
+          );
+
+        if (
+          !response.ok
+        ) {
+          const errorData =
+            await response
+              .json()
+              .catch(
+                () => null
+              );
+
+          console.error(
+            "Add record failed:",
+            errorData
+          );
+
+          return false;
+        }
+
+        const newRecord:
+          FinancialRecord =
+          await response.json();
+
+        setRecords(
+          (
+            previousRecords
+          ) => [
+            ...previousRecords,
+            newRecord,
+          ]
         );
 
-        if (!response.ok) {
+        return true;
+      } catch (
+        error
+      ) {
+        console.error(
+          "Error adding record:",
+          error
+        );
+
+        return false;
+      }
+    };
+
+  /*
+    ==========================
+    UPDATE RECORD
+    ==========================
+  */
+
+  const updateRecord =
+    async (
+      id: string,
+
+      updatedRecord: Omit<
+        FinancialRecord,
+        "_id" | "userID"
+      >
+    ) => {
+      if (!userId) {
+        return;
+      }
+
+      try {
+        const response =
+          await fetch(
+            `http://localhost:3001/financial-records/update/${id}`,
+            {
+              method:
+                "PUT",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+              },
+
+              body:
+                JSON.stringify({
+                  ...updatedRecord,
+
+                  userID:
+                    userId,
+                }),
+            }
+          );
+
+        if (
+          !response.ok
+        ) {
           throw new Error(
-            "Failed to fetch financial records"
+            "Failed to update record"
           );
         }
 
-        const data: FinancialRecord[] =
+        const updated:
+          FinancialRecord =
           await response.json();
 
-        setRecords(data);
-      } catch (error) {
+        setRecords(
+          (
+            previousRecords
+          ) =>
+            previousRecords.map(
+              (
+                record
+              ) =>
+                record._id ===
+                id
+                  ? updated
+                  : record
+            )
+        );
+      } catch (
+        error
+      ) {
         console.error(
-          "Error fetching records:",
+          "Error updating record:",
           error
         );
       }
     };
 
-    void fetchRecords();
-  }, [userId]);
+  /*
+    ==========================
+    DELETE RECORD
+    ==========================
+  */
 
-  // ==============================
-  // ADD RECORD
-  // ==============================
+  const deleteRecord =
+    async (
+      id: string
+    ) => {
+      try {
+        const response =
+          await fetch(
+            `http://localhost:3001/financial-records/delete/${id}`,
+            {
+              method:
+                "DELETE",
+            }
+          );
 
-  const addRecord = async (
-    record: Omit<
-      FinancialRecord,
-      "_id" | "userID"
-    >
-  ): Promise<boolean> => {
-    if (!userId) {
-      return false;
-    }
-
-    try {
-      const response = await fetch(
-        "http://localhost:3001/financial-records/create",
-        {
-          method: "POST",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-
-          body: JSON.stringify({
-            ...record,
-            userID: userId,
-          }),
+        if (
+          !response.ok
+        ) {
+          throw new Error(
+            "Failed to delete record"
+          );
         }
-      );
 
-      if (!response.ok) {
-        return false;
-      }
-
-      const newRecord: FinancialRecord =
-        await response.json();
-
-      setRecords((previousRecords) => [
-        ...previousRecords,
-        newRecord,
-      ]);
-
-      return true;
-    } catch (error) {
-      console.error(
-        "Error adding record:",
+        setRecords(
+          (
+            previousRecords
+          ) =>
+            previousRecords.filter(
+              (
+                record
+              ) =>
+                record._id !==
+                id
+            )
+        );
+      } catch (
         error
-      );
-
-      return false;
-    }
-  };
-
-  // ==============================
-  // UPDATE RECORD
-  // ==============================
-
-  const updateRecord = async (
-    id: string,
-    updatedRecord: Omit<
-      FinancialRecord,
-      "_id" | "userID"
-    >
-  ) => {
-    if (!userId) {
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `http://localhost:3001/financial-records/update/${id}`,
-        {
-          method: "PUT",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-          },
-
-          body: JSON.stringify({
-            ...updatedRecord,
-            userID: userId,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to update record"
+      ) {
+        console.error(
+          "Error deleting record:",
+          error
         );
       }
-
-      const updated: FinancialRecord =
-        await response.json();
-
-      setRecords((previousRecords) =>
-        previousRecords.map((record) =>
-          record._id === id
-            ? updated
-            : record
-        )
-      );
-    } catch (error) {
-      console.error(
-        "Error updating record:",
-        error
-      );
-    }
-  };
-
-  // ==============================
-  // DELETE RECORD
-  // ==============================
-
-  const deleteRecord = async (
-    id: string
-  ) => {
-    try {
-      const response = await fetch(
-        `http://localhost:3001/financial-records/delete/${id}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to delete record"
-        );
-      }
-
-      setRecords((previousRecords) =>
-        previousRecords.filter(
-          (record) =>
-            record._id !== id
-        )
-      );
-    } catch (error) {
-      console.error(
-        "Error deleting record:",
-        error
-      );
-    }
-  };
+    };
 
   return (
     <FinancialRecordContext.Provider
@@ -262,9 +381,10 @@ export const FinancialRecordProvider = ({
 
 export const useFinancialRecordContext =
   () => {
-    const context = useContext(
-      FinancialRecordContext
-    );
+    const context =
+      useContext(
+        FinancialRecordContext
+      );
 
     if (!context) {
       throw new Error(

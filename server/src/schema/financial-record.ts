@@ -1,61 +1,96 @@
 import mongoose from "mongoose";
 
-interface FinancialRecord {
+export interface FinancialRecord {
   userID: string;
+
   description: string;
+
   amount: number;
-  transactionType: string;
+
+  transactionType:
+    | "Income"
+    | "Expense";
+
   date: Date;
-  category: string;
-  paymentMethod: string;
+
+  // Expense-only fields
+  category?: string;
+  paymentMethod?: string;
+
+  // Income-only field
+  incomeType?: string;
+
+  // Optional for both
   notes?: string;
 }
 
-const financialRecordSchema = new mongoose.Schema<FinancialRecord>({
-  userID: {
-    type: String,
-    required: true,
-  },
+const financialRecordSchema =
+  new mongoose.Schema<FinancialRecord>(
+    {
+      userID: {
+        type: String,
+        required: true,
+      },
 
-  description: {
-    type: String,
-    required: true,
-  },
+      description: {
+        type: String,
+        required: true,
+        trim: true,
+      },
 
-  amount: {
-    type: Number,
-    required: true,
-  },
+      amount: {
+        type: Number,
+        required: true,
+        min: 0.01,
+      },
 
-  transactionType: {
-    type: String,
-    required: true,
-  },
+      transactionType: {
+        type: String,
+        required: true,
+        enum: [
+          "Income",
+          "Expense",
+        ],
+      },
 
-  date: {
-    type: Date,
-    required: true,
-  },
+      date: {
+        type: Date,
+        required: true,
+      },
 
-  category: {
-    type: String,
-    required: true,
-  },
+      // Expense only
+      category: {
+        type: String,
+        required: false,
+      },
 
-  paymentMethod: {
-    type: String,
-    required: true,
-  },
+      paymentMethod: {
+        type: String,
+        required: false,
+      },
 
-  notes: {
-    type: String,
-    required: false,
-  },
-});
+      // Income only
+      incomeType: {
+        type: String,
+        required: false,
+      },
 
-const FinancialRecordModel = mongoose.model<FinancialRecord>(
-  "FinancialRecord",
-  financialRecordSchema
-);
+      // Optional for both
+      notes: {
+        type: String,
+        required: false,
+        trim: true,
+      },
+    },
+    {
+      timestamps: true,
+    }
+  );
+
+const FinancialRecordModel =
+  mongoose.model<FinancialRecord>(
+    "FinancialRecord",
+    financialRecordSchema
+  );
 
 export default FinancialRecordModel;
