@@ -1,0 +1,716 @@
+/* ======================================== */
+/* RECORD LIST HEADER                       */
+/* ======================================== */
+
+.record-list-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 20px;
+
+  margin-bottom: 24px;
+}
+
+.record-list-title h2 {
+  margin: 0;
+}
+
+.record-count {
+  padding: 7px 10px;
+
+  border: 1px solid var(--border);
+  border-radius: 999px;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--primary) 8%,
+      transparent
+    );
+
+  color: var(--primary);
+
+  font-size: 0.72rem;
+  font-weight: 800;
+
+  white-space: nowrap;
+}
+
+
+/* ======================================== */
+/* EMPTY RECORDS                            */
+/* ======================================== */
+
+.empty-records {
+  min-height: 220px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+}
+
+.empty-records-icon {
+  margin-bottom: 12px;
+
+  font-size: 2rem;
+}
+
+.empty-records h3 {
+  margin:
+    0
+    0
+    7px;
+
+  color: var(--text-main);
+}
+
+.empty-records p {
+  max-width: 330px;
+
+  margin: 0;
+
+  color: var(--text-secondary);
+
+  font-size: 0.85rem;
+}
+
+
+/* ======================================== */
+/* TRANSACTION BADGES                       */
+/* ======================================== */
+
+.transaction-badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  padding:
+    5px
+    8px;
+
+  border-radius: 999px;
+
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.transaction-badge.income {
+  background:
+    rgba(
+      34,
+      197,
+      94,
+      0.1
+    );
+
+  color:
+    #22c55e;
+}
+
+.transaction-badge.expense {
+  background:
+    rgba(
+      239,
+      68,
+      68,
+      0.1
+    );
+
+  color:
+    #ef4444;
+}
+
+
+/* ======================================== */
+/* RECORD ACTIONS                           */
+/* ======================================== */
+
+.record-actions {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+}
+
+.edit-record-button {
+  padding:
+    8px
+    12px;
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      var(--primary) 40%,
+      transparent
+    );
+
+  border-radius:
+    8px;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--primary) 8%,
+      transparent
+    );
+
+  color:
+    var(--primary);
+
+  font-size:
+    0.78rem;
+
+  font-weight:
+    700;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.edit-record-button:hover {
+  transform:
+    translateY(-1px);
+
+  background:
+    color-mix(
+      in srgb,
+      var(--primary) 15%,
+      transparent
+    );
+
+  box-shadow:
+    0 5px 15px
+    color-mix(
+      in srgb,
+      var(--primary) 12%,
+      transparent
+    );
+}
+
+
+/* ======================================== */
+/* EDIT MODAL                               */
+/* ======================================== */
+
+.edit-record-modal {
+  width: 100%;
+  max-width: 520px;
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  padding: 28px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    22px;
+
+  background:
+    var(--card-bg-solid);
+
+  color:
+    var(--text-main);
+
+  box-shadow:
+    0 30px 80px
+    rgba(
+      0,
+      0,
+      0,
+      0.35
+    );
+
+  animation:
+    editModalIn
+    0.2s
+    ease;
+}
+
+.edit-modal-header {
+  display: flex;
+
+  justify-content:
+    space-between;
+
+  align-items:
+    flex-start;
+
+  gap: 20px;
+
+  margin-bottom:
+    24px;
+}
+
+.edit-modal-header h2 {
+  margin:
+    0
+    0
+    7px;
+
+  color:
+    var(--text-main);
+}
+
+.edit-modal-header p:not(
+  .section-label
+) {
+  margin: 0;
+
+  color:
+    var(--text-secondary);
+
+  font-size:
+    0.82rem;
+}
+
+.edit-modal-close {
+  width: 38px;
+  height: 38px;
+
+  flex-shrink: 0;
+
+  display: grid;
+
+  place-items: center;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    10px;
+
+  background:
+    var(--input-bg);
+
+  color:
+    var(--text-secondary);
+
+  font-size:
+    1.3rem;
+
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.edit-modal-close:hover {
+  transform:
+    rotate(5deg);
+
+  border-color:
+    var(--primary);
+
+  color:
+    var(--primary);
+}
+
+
+/* ======================================== */
+/* EDIT BUDGET PREVIEW                      */
+/* ======================================== */
+
+.edit-budget-preview {
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    1fr;
+
+  gap:
+    10px;
+
+  margin-bottom:
+    18px;
+}
+
+.edit-budget-preview > div {
+  padding:
+    12px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    11px;
+
+  background:
+    color-mix(
+      in srgb,
+      var(--page-bg) 48%,
+      transparent
+    );
+}
+
+.edit-budget-preview span {
+  display: block;
+
+  margin-bottom:
+    5px;
+
+  color:
+    var(--text-secondary);
+
+  font-size:
+    0.7rem;
+
+  font-weight:
+    700;
+}
+
+.edit-budget-preview strong {
+  font-size:
+    0.9rem;
+}
+
+
+/* ======================================== */
+/* EDIT ACTIONS                             */
+/* ======================================== */
+
+.edit-modal-actions {
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    1fr;
+
+  gap:
+    12px;
+
+  margin-top:
+    22px;
+}
+
+
+/* ======================================== */
+/* DELETE MODAL                             */
+/* ======================================== */
+
+.delete-confirm-modal {
+  width: 100%;
+  max-width: 440px;
+
+  padding:
+    30px;
+
+  border:
+    1px solid
+    color-mix(
+      in srgb,
+      #ef4444 25%,
+      var(--border)
+    );
+
+  border-radius:
+    22px;
+
+  background:
+    var(--card-bg-solid);
+
+  color:
+    var(--text-main);
+
+  box-shadow:
+    0 30px 80px
+    rgba(
+      0,
+      0,
+      0,
+      0.35
+    );
+
+  animation:
+    editModalIn
+    0.2s
+    ease;
+}
+
+.delete-warning-icon {
+  width:
+    48px;
+
+  height:
+    48px;
+
+  display:
+    grid;
+
+  place-items:
+    center;
+
+  margin-bottom:
+    18px;
+
+  border:
+    1px solid
+    rgba(
+      239,
+      68,
+      68,
+      0.35
+    );
+
+  border-radius:
+    14px;
+
+  background:
+    rgba(
+      239,
+      68,
+      68,
+      0.1
+    );
+
+  color:
+    #ef4444;
+
+  font-size:
+    1.3rem;
+
+  font-weight:
+    900;
+}
+
+.delete-label {
+  color:
+    #ef4444;
+}
+
+.delete-confirm-modal h2 {
+  margin:
+    0
+    0
+    8px;
+
+  color:
+    var(--text-main);
+}
+
+.delete-confirm-description {
+  margin:
+    0
+    0
+    20px;
+
+  color:
+    var(--text-secondary);
+}
+
+
+/* ======================================== */
+/* DELETE PREVIEW                           */
+/* ======================================== */
+
+.delete-record-preview {
+  overflow:
+    hidden;
+
+  margin-bottom:
+    18px;
+
+  border:
+    1px solid
+    var(--border);
+
+  border-radius:
+    12px;
+}
+
+.delete-record-preview > div {
+  display:
+    flex;
+
+  justify-content:
+    space-between;
+
+  gap:
+    15px;
+
+  padding:
+    11px
+    13px;
+
+  border-bottom:
+    1px solid
+    var(--border);
+}
+
+.delete-record-preview > div:last-child {
+  border-bottom:
+    none;
+}
+
+.delete-record-preview span {
+  color:
+    var(--text-secondary);
+
+  font-size:
+    0.8rem;
+}
+
+.delete-record-preview strong {
+  max-width:
+    60%;
+
+  color:
+    var(--text-main);
+
+  text-align:
+    right;
+}
+
+
+/* ======================================== */
+/* DELETE ACTIONS                           */
+/* ======================================== */
+
+.delete-modal-actions {
+  display:
+    grid;
+
+  grid-template-columns:
+    1fr
+    1.3fr;
+
+  gap:
+    12px;
+
+  margin-top:
+    22px;
+}
+
+.final-delete-button {
+  padding:
+    12px
+    15px;
+
+  border:
+    1px solid
+    rgba(
+      239,
+      68,
+      68,
+      0.3
+    );
+
+  border-radius:
+    10px;
+
+  background:
+    #ef4444;
+
+  color:
+    white;
+
+  font-weight:
+    800;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.final-delete-button:hover:not(
+  :disabled
+) {
+  transform:
+    translateY(-2px);
+
+  background:
+    #dc2626;
+
+  box-shadow:
+    0 8px 20px
+    rgba(
+      239,
+      68,
+      68,
+      0.22
+    );
+}
+
+.final-delete-button:disabled {
+  opacity:
+    0.55;
+
+  cursor:
+    not-allowed;
+}
+
+
+/* ======================================== */
+/* ANIMATION                                */
+/* ======================================== */
+
+@keyframes editModalIn {
+  from {
+    opacity: 0;
+
+    transform:
+      translateY(12px)
+      scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+
+    transform:
+      translateY(0)
+      scale(1);
+  }
+}
+
+
+/* ======================================== */
+/* RESPONSIVE                               */
+/* ======================================== */
+
+@media (
+  max-width: 600px
+) {
+  .record-list-title {
+    flex-direction:
+      column;
+
+    align-items:
+      flex-start;
+  }
+
+  .record-actions {
+    flex-direction:
+      column;
+
+    align-items:
+      stretch;
+  }
+
+  .edit-record-modal,
+  .delete-confirm-modal {
+    padding:
+      21px;
+  }
+
+  .edit-budget-preview,
+  .edit-modal-actions,
+  .delete-modal-actions {
+    grid-template-columns:
+      1fr;
+  }
+}

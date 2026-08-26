@@ -30,21 +30,14 @@ export interface FinancialRecord {
 
   date: string;
 
-  /*
-    Expense-only fields
-  */
+  // Expense only
   category?: string;
-
   paymentMethod?: string;
 
-  /*
-    Income-only field
-  */
+  // Income only
   incomeType?: string;
 
-  /*
-    Optional for both
-  */
+  // Both
   notes?: string;
 }
 
@@ -65,11 +58,11 @@ interface FinancialRecordContextType {
       FinancialRecord,
       "_id" | "userID"
     >
-  ) => Promise<void>;
+  ) => Promise<boolean>;
 
   deleteRecord: (
     id: string
-  ) => Promise<void>;
+  ) => Promise<boolean>;
 }
 
 export const FinancialRecordContext =
@@ -104,11 +97,9 @@ export const FinancialRecordProvider = ({
       ? user.id
       : undefined;
 
-  /*
-    ==========================
-    FETCH ALL USER RECORDS
-    ==========================
-  */
+  /* ============================== */
+  /* FETCH RECORDS                  */
+  /* ============================== */
 
   useEffect(() => {
     if (!userId) {
@@ -123,11 +114,9 @@ export const FinancialRecordProvider = ({
               `http://localhost:3001/financial-records/getAllByUserID/${userId}`
             );
 
-          if (
-            !response.ok
-          ) {
+          if (!response.ok) {
             throw new Error(
-              "Failed to fetch financial records"
+              "Failed to fetch financial records."
             );
           }
 
@@ -135,12 +124,8 @@ export const FinancialRecordProvider = ({
             FinancialRecord[] =
             await response.json();
 
-          setRecords(
-            data
-          );
-        } catch (
-          error
-        ) {
+          setRecords(data);
+        } catch (error) {
           console.error(
             "Error fetching records:",
             error
@@ -149,15 +134,11 @@ export const FinancialRecordProvider = ({
       };
 
     void fetchRecords();
-  }, [
-    userId,
-  ]);
+  }, [userId]);
 
-  /*
-    ==========================
-    ADD RECORD
-    ==========================
-  */
+  /* ============================== */
+  /* ADD RECORD                     */
+  /* ============================== */
 
   const addRecord =
     async (
@@ -186,34 +167,30 @@ export const FinancialRecordProvider = ({
               body:
                 JSON.stringify({
                   ...record,
-
                   userID:
                     userId,
                 }),
             }
           );
 
-        if (
-          !response.ok
-        ) {
-          const errorData =
-            await response
-              .json()
-              .catch(
-                () => null
-              );
+        const data =
+          await response
+            .json()
+            .catch(
+              () => null
+            );
 
+        if (!response.ok) {
           console.error(
-            "Add record failed:",
-            errorData
+            "Failed to add record:",
+            data
           );
 
           return false;
         }
 
-        const newRecord:
-          FinancialRecord =
-          await response.json();
+        const newRecord =
+          data as FinancialRecord;
 
         setRecords(
           (
@@ -225,9 +202,7 @@ export const FinancialRecordProvider = ({
         );
 
         return true;
-      } catch (
-        error
-      ) {
+      } catch (error) {
         console.error(
           "Error adding record:",
           error
@@ -237,11 +212,9 @@ export const FinancialRecordProvider = ({
       }
     };
 
-  /*
-    ==========================
-    UPDATE RECORD
-    ==========================
-  */
+  /* ============================== */
+  /* UPDATE RECORD                  */
+  /* ============================== */
 
   const updateRecord =
     async (
@@ -251,9 +224,9 @@ export const FinancialRecordProvider = ({
         FinancialRecord,
         "_id" | "userID"
       >
-    ) => {
+    ): Promise<boolean> => {
       if (!userId) {
-        return;
+        return false;
       }
 
       try {
@@ -279,17 +252,24 @@ export const FinancialRecordProvider = ({
             }
           );
 
-        if (
-          !response.ok
-        ) {
-          throw new Error(
-            "Failed to update record"
+        const data =
+          await response
+            .json()
+            .catch(
+              () => null
+            );
+
+        if (!response.ok) {
+          console.error(
+            "Failed to update record:",
+            data
           );
+
+          return false;
         }
 
-        const updated:
-          FinancialRecord =
-          await response.json();
+        const updated =
+          data as FinancialRecord;
 
         setRecords(
           (
@@ -305,26 +285,26 @@ export const FinancialRecordProvider = ({
                   : record
             )
         );
-      } catch (
-        error
-      ) {
+
+        return true;
+      } catch (error) {
         console.error(
           "Error updating record:",
           error
         );
+
+        return false;
       }
     };
 
-  /*
-    ==========================
-    DELETE RECORD
-    ==========================
-  */
+  /* ============================== */
+  /* DELETE RECORD                  */
+  /* ============================== */
 
   const deleteRecord =
     async (
       id: string
-    ) => {
+    ): Promise<boolean> => {
       try {
         const response =
           await fetch(
@@ -335,12 +315,20 @@ export const FinancialRecordProvider = ({
             }
           );
 
-        if (
-          !response.ok
-        ) {
-          throw new Error(
-            "Failed to delete record"
+        if (!response.ok) {
+          const data =
+            await response
+              .json()
+              .catch(
+                () => null
+              );
+
+          console.error(
+            "Failed to delete record:",
+            data
           );
+
+          return false;
         }
 
         setRecords(
@@ -355,13 +343,15 @@ export const FinancialRecordProvider = ({
                 id
             )
         );
-      } catch (
-        error
-      ) {
+
+        return true;
+      } catch (error) {
         console.error(
           "Error deleting record:",
           error
         );
+
+        return false;
       }
     };
 

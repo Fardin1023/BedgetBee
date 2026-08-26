@@ -14,14 +14,15 @@ export interface FinancialRecord {
   date: Date;
 
   // Expense-only fields
-  category?: string;
-  paymentMethod?: string;
+  category?: string | undefined;
+
+  paymentMethod?: string | undefined;
 
   // Income-only field
-  incomeType?: string;
+  incomeType?: string | undefined;
 
   // Optional for both
-  notes?: string;
+  notes?: string | undefined;
 }
 
 const financialRecordSchema =
@@ -47,6 +48,7 @@ const financialRecordSchema =
       transactionType: {
         type: String,
         required: true,
+
         enum: [
           "Income",
           "Expense",
