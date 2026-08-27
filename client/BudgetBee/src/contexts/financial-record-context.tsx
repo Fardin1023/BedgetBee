@@ -30,20 +30,17 @@ export interface FinancialRecord {
 
   date: string;
 
-  // Expense only
   category?: string;
+
   paymentMethod?: string;
 
-  // Income only
   incomeType?: string;
 
-  // Both
   notes?: string;
 }
 
 interface FinancialRecordContextType {
-  records:
-    FinancialRecord[];
+  records: FinancialRecord[];
 
   addRecord: (
     record: Omit<
@@ -64,6 +61,19 @@ interface FinancialRecordContextType {
     id: string
   ) => Promise<boolean>;
 }
+
+/* ======================================== */
+/* API URL                                  */
+/* ======================================== */
+
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:3001";
+
+console.log(
+  "BudgetBee API:",
+  API_URL
+);
 
 export const FinancialRecordContext =
   createContext<
@@ -97,9 +107,9 @@ export const FinancialRecordProvider = ({
       ? user.id
       : undefined;
 
-  /* ============================== */
-  /* FETCH RECORDS                  */
-  /* ============================== */
+  /* ====================================== */
+  /* FETCH RECORDS                          */
+  /* ====================================== */
 
   useEffect(() => {
     if (!userId) {
@@ -111,7 +121,7 @@ export const FinancialRecordProvider = ({
         try {
           const response =
             await fetch(
-              `http://localhost:3001/financial-records/getAllByUserID/${userId}`
+              `${API_URL}/financial-records/getAllByUserID/${userId}`
             );
 
           if (!response.ok) {
@@ -120,14 +130,17 @@ export const FinancialRecordProvider = ({
             );
           }
 
-          const data:
-            FinancialRecord[] =
-            await response.json();
+          const data =
+            (await response.json()) as FinancialRecord[];
 
-          setRecords(data);
-        } catch (error) {
+          setRecords(
+            data
+          );
+        } catch (
+          error
+        ) {
           console.error(
-            "Error fetching records:",
+            "FETCH RECORDS ERROR:",
             error
           );
         }
@@ -136,9 +149,9 @@ export const FinancialRecordProvider = ({
     void fetchRecords();
   }, [userId]);
 
-  /* ============================== */
-  /* ADD RECORD                     */
-  /* ============================== */
+  /* ====================================== */
+  /* ADD RECORD                             */
+  /* ====================================== */
 
   const addRecord =
     async (
@@ -148,13 +161,29 @@ export const FinancialRecordProvider = ({
       >
     ): Promise<boolean> => {
       if (!userId) {
+        console.error(
+          "ADD ERROR: Clerk user ID is missing."
+        );
+
         return false;
       }
 
       try {
+        const payload = {
+          ...record,
+
+          userID:
+            userId,
+        };
+
+        console.log(
+          "ADD RECORD PAYLOAD:",
+          payload
+        );
+
         const response =
           await fetch(
-            "http://localhost:3001/financial-records/create",
+            `${API_URL}/financial-records/create`,
             {
               method:
                 "POST",
@@ -165,11 +194,9 @@ export const FinancialRecordProvider = ({
               },
 
               body:
-                JSON.stringify({
-                  ...record,
-                  userID:
-                    userId,
-                }),
+                JSON.stringify(
+                  payload
+                ),
             }
           );
 
@@ -180,9 +207,19 @@ export const FinancialRecordProvider = ({
               () => null
             );
 
+        console.log(
+          "ADD STATUS:",
+          response.status
+        );
+
+        console.log(
+          "ADD RESPONSE:",
+          data
+        );
+
         if (!response.ok) {
           console.error(
-            "Failed to add record:",
+            "ADD RECORD FAILED:",
             data
           );
 
@@ -202,9 +239,11 @@ export const FinancialRecordProvider = ({
         );
 
         return true;
-      } catch (error) {
+      } catch (
+        error
+      ) {
         console.error(
-          "Error adding record:",
+          "ADD RECORD ERROR:",
           error
         );
 
@@ -212,9 +251,9 @@ export const FinancialRecordProvider = ({
       }
     };
 
-  /* ============================== */
-  /* UPDATE RECORD                  */
-  /* ============================== */
+  /* ====================================== */
+  /* UPDATE RECORD                          */
+  /* ====================================== */
 
   const updateRecord =
     async (
@@ -226,13 +265,24 @@ export const FinancialRecordProvider = ({
       >
     ): Promise<boolean> => {
       if (!userId) {
+        console.error(
+          "UPDATE ERROR: Clerk user ID is missing."
+        );
+
         return false;
       }
 
       try {
+        const payload = {
+          ...updatedRecord,
+
+          userID:
+            userId,
+        };
+
         const response =
           await fetch(
-            `http://localhost:3001/financial-records/update/${id}`,
+            `${API_URL}/financial-records/update/${id}`,
             {
               method:
                 "PUT",
@@ -243,12 +293,9 @@ export const FinancialRecordProvider = ({
               },
 
               body:
-                JSON.stringify({
-                  ...updatedRecord,
-
-                  userID:
-                    userId,
-                }),
+                JSON.stringify(
+                  payload
+                ),
             }
           );
 
@@ -261,7 +308,7 @@ export const FinancialRecordProvider = ({
 
         if (!response.ok) {
           console.error(
-            "Failed to update record:",
+            "UPDATE RECORD FAILED:",
             data
           );
 
@@ -287,9 +334,11 @@ export const FinancialRecordProvider = ({
         );
 
         return true;
-      } catch (error) {
+      } catch (
+        error
+      ) {
         console.error(
-          "Error updating record:",
+          "UPDATE RECORD ERROR:",
           error
         );
 
@@ -297,9 +346,9 @@ export const FinancialRecordProvider = ({
       }
     };
 
-  /* ============================== */
-  /* DELETE RECORD                  */
-  /* ============================== */
+  /* ====================================== */
+  /* DELETE RECORD                          */
+  /* ====================================== */
 
   const deleteRecord =
     async (
@@ -308,23 +357,23 @@ export const FinancialRecordProvider = ({
       try {
         const response =
           await fetch(
-            `http://localhost:3001/financial-records/delete/${id}`,
+            `${API_URL}/financial-records/delete/${id}`,
             {
               method:
                 "DELETE",
             }
           );
 
-        if (!response.ok) {
-          const data =
-            await response
-              .json()
-              .catch(
-                () => null
-              );
+        const data =
+          await response
+            .json()
+            .catch(
+              () => null
+            );
 
+        if (!response.ok) {
           console.error(
-            "Failed to delete record:",
+            "DELETE RECORD FAILED:",
             data
           );
 
@@ -345,9 +394,11 @@ export const FinancialRecordProvider = ({
         );
 
         return true;
-      } catch (error) {
+      } catch (
+        error
+      ) {
         console.error(
-          "Error deleting record:",
+          "DELETE RECORD ERROR:",
           error
         );
 
