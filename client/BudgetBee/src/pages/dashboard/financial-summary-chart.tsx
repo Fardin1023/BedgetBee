@@ -883,9 +883,11 @@ export const FinancialSummaryChart = () => {
 
                 record.description,
 
-                record.category,
+                record.category ||
+                  "-",
 
-                record.paymentMethod,
+                record.paymentMethod ||
+                  "-",
 
                 `BDT ${formatMoney(
                   Number(
