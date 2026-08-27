@@ -7,13 +7,13 @@ import {
   useState,
 } from "react";
 
-import type {
-  ReactNode,
-} from "react";
+import type { ReactNode } from "react";
 
-import {
-  useUser,
-} from "@clerk/react";
+import { useUser } from "@clerk/react";
+
+/* ======================================== */
+/* FINANCIAL RECORD TYPE                    */
+/* ======================================== */
 
 export interface FinancialRecord {
   _id?: string;
@@ -30,14 +30,21 @@ export interface FinancialRecord {
 
   date: string;
 
+  // Expense only
   category?: string;
 
   paymentMethod?: string;
 
+  // Income only
   incomeType?: string;
 
+  // Optional for both
   notes?: string;
 }
+
+/* ======================================== */
+/* CONTEXT TYPE                             */
+/* ======================================== */
 
 interface FinancialRecordContextType {
   records: FinancialRecord[];
@@ -51,6 +58,7 @@ interface FinancialRecordContextType {
 
   updateRecord: (
     id: string,
+
     updatedRecord: Omit<
       FinancialRecord,
       "_id" | "userID"
@@ -66,20 +74,33 @@ interface FinancialRecordContextType {
 /* API URL                                  */
 /* ======================================== */
 
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "http://localhost:3001";
+/*
+  Local:
+  http://localhost:3001
 
-console.log(
-  "BudgetBee API:",
-  API_URL
-);
+  Vercel:
+  Uses VITE_API_URL from
+  Vercel Environment Variables.
+*/
+
+const API_URL = (
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:3001"
+).replace(/\/$/, "");
+
+/* ======================================== */
+/* CREATE CONTEXT                           */
+/* ======================================== */
 
 export const FinancialRecordContext =
   createContext<
     FinancialRecordContextType
     | undefined
   >(undefined);
+
+/* ======================================== */
+/* PROVIDER                                 */
+/* ======================================== */
 
 export const FinancialRecordProvider = ({
   children,
@@ -89,17 +110,15 @@ export const FinancialRecordProvider = ({
   const [
     records,
     setRecords,
-  ] =
-    useState<
-      FinancialRecord[]
-    >([]);
+  ] = useState<
+    FinancialRecord[]
+  >([]);
 
   const {
     isLoaded,
     isSignedIn,
     user,
-  } =
-    useUser();
+  } = useUser();
 
   const userId =
     isLoaded &&
@@ -108,7 +127,7 @@ export const FinancialRecordProvider = ({
       : undefined;
 
   /* ====================================== */
-  /* FETCH RECORDS                          */
+  /* FETCH ALL USER RECORDS                 */
   /* ====================================== */
 
   useEffect(() => {
@@ -125,9 +144,19 @@ export const FinancialRecordProvider = ({
             );
 
           if (!response.ok) {
-            throw new Error(
-              "Failed to fetch financial records."
+            const errorData =
+              await response
+                .json()
+                .catch(
+                  () => null
+                );
+
+            console.error(
+              "FETCH RECORDS FAILED:",
+              errorData
             );
+
+            return;
           }
 
           const data =
@@ -136,9 +165,7 @@ export const FinancialRecordProvider = ({
           setRecords(
             data
           );
-        } catch (
-          error
-        ) {
+        } catch (error) {
           console.error(
             "FETCH RECORDS ERROR:",
             error
@@ -162,7 +189,7 @@ export const FinancialRecordProvider = ({
     ): Promise<boolean> => {
       if (!userId) {
         console.error(
-          "ADD ERROR: Clerk user ID is missing."
+          "ADD RECORD ERROR: User is not signed in."
         );
 
         return false;
@@ -175,11 +202,6 @@ export const FinancialRecordProvider = ({
           userID:
             userId,
         };
-
-        console.log(
-          "ADD RECORD PAYLOAD:",
-          payload
-        );
 
         const response =
           await fetch(
@@ -207,16 +229,6 @@ export const FinancialRecordProvider = ({
               () => null
             );
 
-        console.log(
-          "ADD STATUS:",
-          response.status
-        );
-
-        console.log(
-          "ADD RESPONSE:",
-          data
-        );
-
         if (!response.ok) {
           console.error(
             "ADD RECORD FAILED:",
@@ -239,9 +251,7 @@ export const FinancialRecordProvider = ({
         );
 
         return true;
-      } catch (
-        error
-      ) {
+      } catch (error) {
         console.error(
           "ADD RECORD ERROR:",
           error
@@ -266,7 +276,7 @@ export const FinancialRecordProvider = ({
     ): Promise<boolean> => {
       if (!userId) {
         console.error(
-          "UPDATE ERROR: Clerk user ID is missing."
+          "UPDATE RECORD ERROR: User is not signed in."
         );
 
         return false;
@@ -334,9 +344,7 @@ export const FinancialRecordProvider = ({
         );
 
         return true;
-      } catch (
-        error
-      ) {
+      } catch (error) {
         console.error(
           "UPDATE RECORD ERROR:",
           error
@@ -394,9 +402,7 @@ export const FinancialRecordProvider = ({
         );
 
         return true;
-      } catch (
-        error
-      ) {
+      } catch (error) {
         console.error(
           "DELETE RECORD ERROR:",
           error
@@ -405,6 +411,10 @@ export const FinancialRecordProvider = ({
         return false;
       }
     };
+
+  /* ====================================== */
+  /* PROVIDER                               */
+  /* ====================================== */
 
   return (
     <FinancialRecordContext.Provider
@@ -419,6 +429,10 @@ export const FinancialRecordProvider = ({
     </FinancialRecordContext.Provider>
   );
 };
+
+/* ======================================== */
+/* CUSTOM HOOK                              */
+/* ======================================== */
 
 export const useFinancialRecordContext =
   () => {
