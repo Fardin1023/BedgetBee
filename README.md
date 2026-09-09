@@ -8,28 +8,33 @@ Built with **React, TypeScript, Node.js, Express.js, and MongoDB**, with the fro
 
 ## 🚀 Live Demo
 
-Frontend:  
-`https://bedget-bee.vercel.app`
+**Frontend:**  
+https://bedget-bee.vercel.app
 
-Backend API:  
-`https://budgetbee-uuev.onrender.com`
+**Backend API:**  
+https://budgetbee-uuev.onrender.com
+
+---
+
+## 🖥️ Interface Preview
+
+![BudgetBee Dashboard](./assets/budgetbee-dashboard.png)
 
 ---
 
 ## ✨ Key Features
 
-- User registration and login
-- Protected dashboard
-- Income and expense tracking
-- Edit and delete transactions
-- Monthly spending limit based on income
-- Budget warning system
-- Weekly and monthly financial analytics
-- Interactive charts with Recharts
-- Downloadable monthly PDF reports
-- Light and dark themes
-- User-specific financial records
-- Responsive dashboard
+- 🔐 User registration and login
+- 💰 Income and expense tracking
+- ✏️ Edit and delete transactions
+- 📊 Monthly spending limit based on income
+- ⚠️ Budget warning system
+- 📈 Weekly and monthly financial analytics
+- 📉 Interactive charts using Recharts
+- 📄 Downloadable monthly PDF reports
+- ☀️ Light and 🌙 dark themes
+- 👤 User-specific financial records
+- 📱 Responsive dashboard
 
 ---
 
@@ -83,6 +88,9 @@ MongoDB Atlas
 
 ```text
 BudgetBee/
+│
+├── assets/
+│   └── budgetbee-dashboard.png
 │
 ├── client/
 │   └── BudgetBee/
@@ -141,7 +149,7 @@ Remaining Balance =
 Monthly Income - Monthly Expenses
 ```
 
-The application warns users as spending approaches the monthly limit and prevents expenses from exceeding the available balance.
+The application warns users as spending approaches their monthly limit and prevents expenses from exceeding the available balance.
 
 ---
 
@@ -169,7 +177,7 @@ Users can generate monthly financial reports containing:
 - Payment method
 - Notes
 
-Generated using **jsPDF** and **jspdf-autotable**.
+Reports are generated using **jsPDF** and **jspdf-autotable**.
 
 ---
 
@@ -182,7 +190,7 @@ git clone https://github.com/Fardin1023/BudgetBee.git
 cd BudgetBee
 ```
 
-Frontend:
+### Frontend
 
 ```bash
 cd client/BudgetBee
@@ -190,7 +198,7 @@ npm install
 npm run dev
 ```
 
-Backend:
+### Backend
 
 ```bash
 cd server
@@ -198,19 +206,23 @@ npm install
 npm run dev
 ```
 
-Create the required environment files:
+### Environment Variables
+
+Frontend:
 
 ```env
-# Frontend
 VITE_API_URL=http://localhost:3001
 ```
 
+Backend:
+
 ```env
-# Backend
 MONGO_URI=YOUR_MONGODB_URI
 JWT_SECRET=YOUR_JWT_SECRET
 PORT=3001
 ```
+
+> Never commit `.env` files or sensitive credentials to GitHub.
 
 ---
 
@@ -243,7 +255,7 @@ PORT=3001
 ✅ Financial analytics  
 ✅ PDF reports  
 ✅ MongoDB persistence  
-✅ Vercel + Render deployment
+✅ Vercel + Render deployment  
 
 ---
 
