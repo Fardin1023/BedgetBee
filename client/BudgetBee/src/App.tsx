@@ -8,8 +8,8 @@ import {
 } from "react-router-dom";
 
 import {
-  useUser,
-} from "@clerk/react";
+  useAuth,
+} from "./contexts/auth-context";
 
 import {
   Dashboard,
@@ -31,7 +31,7 @@ const ProtectedDashboard = () => {
   const {
     isLoaded,
     isSignedIn,
-  } = useUser();
+  } = useAuth();
 
   /* Wait until Clerk knows
      whether the user is signed in */
@@ -75,7 +75,7 @@ const AuthRoute = () => {
   const {
     isLoaded,
     isSignedIn,
-  } = useUser();
+  } = useAuth();
 
   if (!isLoaded) {
     return (

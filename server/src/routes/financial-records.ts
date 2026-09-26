@@ -1,8 +1,10 @@
 import { Router } from "express";
 
 import FinancialRecordModel from "../schema/financial-record";
+import { authMiddleware } from "./auth";
 
 const router = Router();
+router.use(authMiddleware);
 
 /* ======================================== */
 /* HELPER: MONTH RANGE                      */

@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
 
+import authRouter from "./routes/auth";
 import financialRecordsRouter from "./routes/financial-records";
 
 dotenv.config();
@@ -34,6 +35,8 @@ mongoose
       err
     );
   });
+
+app.use("/auth", authRouter);
 
 app.use(
   "/financial-records",

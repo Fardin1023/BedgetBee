@@ -9,7 +9,7 @@ import {
 
 import type { ReactNode } from "react";
 
-import { useUser } from "@clerk/react";
+import { useAuth } from "./auth-context";
 
 /* ======================================== */
 /* FINANCIAL RECORD TYPE                    */
@@ -118,12 +118,13 @@ export const FinancialRecordProvider = ({
     isLoaded,
     isSignedIn,
     user,
-  } = useUser();
+    token,
+  } = useAuth();
 
   const userId =
     isLoaded &&
     isSignedIn
-      ? user.id
+      ? user?.id
       : undefined;
 
   /* ====================================== */
@@ -140,7 +141,12 @@ export const FinancialRecordProvider = ({
         try {
           const response =
             await fetch(
-              `${API_URL}/financial-records/getAllByUserID/${userId}`
+              `${API_URL}/financial-records/getAllByUserID/${userId}`,
+              {
+                headers: {
+                  "Authorization": `Bearer ${token}`
+                }
+              }
             );
 
           if (!response.ok) {
@@ -213,6 +219,7 @@ export const FinancialRecordProvider = ({
               headers: {
                 "Content-Type":
                   "application/json",
+                "Authorization": `Bearer ${token}`
               },
 
               body:
@@ -300,6 +307,7 @@ export const FinancialRecordProvider = ({
               headers: {
                 "Content-Type":
                   "application/json",
+                "Authorization": `Bearer ${token}`
               },
 
               body:
@@ -369,6 +377,9 @@ export const FinancialRecordProvider = ({
             {
               method:
                 "DELETE",
+              headers: {
+                "Authorization": `Bearer ${token}`
+              }
             }
           );
 

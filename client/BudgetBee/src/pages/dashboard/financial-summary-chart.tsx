@@ -18,7 +18,7 @@ import jsPDF from "jspdf";
 
 import autoTable from "jspdf-autotable";
 
-import { useUser } from "@clerk/react";
+import { useAuth } from "../../contexts/auth-context";
 
 import { useFinancialRecordContext } from "../../contexts/financial-record-context";
 
@@ -148,7 +148,7 @@ export const FinancialSummaryChart = () => {
   const {
     user,
   } =
-    useUser();
+    useAuth();
 
   const [
     viewMode,
@@ -712,7 +712,7 @@ export const FinancialSummaryChart = () => {
 
       const userName =
         [
-          user?.firstName,
+          user?.username,
           user?.lastName,
         ]
           .filter(Boolean)
