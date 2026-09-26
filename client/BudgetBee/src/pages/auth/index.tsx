@@ -205,88 +205,149 @@ export const Auth = () => {
           </div>
         </div>
 
-        <div className="auth-action-wrapper">
+        <div className="auth-action-wrapper" style={{ overflow: 'hidden', position: 'relative' }}>
           {!isSignedIn ? (
-            <div className="auth-action-card">
-              <div className="auth-action-icon">🐝</div>
-              <p className="section-label">{isLoginMode ? "WELCOME BACK" : "JOIN BUDGET BEE"}</p>
-              <h2>{isLoginMode ? "Sign in to your account" : "Create your free account"}</h2>
-              
-              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem', width: '100%' }}>
-                {!isLoginMode && (
-                  <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                    style={{ padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #ccc' }}
-                  />
-                )}
-                <input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  style={{ padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #ccc' }}
-                />
-                <div style={{ position: 'relative', width: '100%' }}>
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    style={{ width: '100%', padding: '0.75rem', paddingRight: '2.5rem', borderRadius: '0.5rem', border: '1px solid #ccc', boxSizing: 'border-box' }}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    style={{
-                      position: 'absolute',
-                      right: '0.75rem',
-                      top: '50%',
-                      transform: 'translateY(-50%)',
-                      background: 'none',
-                      border: 'none',
-                      cursor: 'pointer',
-                      fontSize: '1.2rem',
-                      color: '#666',
-                      padding: 0
-                    }}
-                    aria-label="Toggle password visibility"
-                  >
-                    {showPassword ? "👁️" : "👁️‍🗨️"}
-                  </button>
-                </div>
-                
-                {authError && <p style={{ color: 'red', fontSize: '0.875rem' }}>{authError}</p>}
-                
-                <button type="submit" className="auth-primary-button" disabled={isLoading} style={{ width: '100%', justifyContent: 'center' }}>
-                  {isLoading ? "Please wait..." : isLoginMode ? "Sign In" : "Sign Up"}
-                </button>
-              </form>
+            <div 
+              style={{ 
+                display: 'flex', 
+                width: '200%', 
+                transition: 'transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55)', 
+                transform: isLoginMode ? 'translateX(0)' : 'translateX(-50%)',
+                alignItems: 'flex-start'
+              }}
+            >
+              {/* LOGIN PANEL */}
+              <div style={{ width: '50%', flexShrink: 0, paddingRight: '1rem', boxSizing: 'border-box' }}>
+                <div className="auth-action-card">
+                  <div className="auth-action-icon">🐝</div>
+                  <p className="section-label">WELCOME BACK</p>
+                  <h2>Sign in to your account</h2>
+                  
+                  <form onSubmit={(e) => { setIsLoginMode(true); handleSubmit(e); }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem', width: '100%' }}>
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      style={{ padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #ccc' }}
+                    />
+                    <div style={{ position: 'relative', width: '100%' }}>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        style={{ width: '100%', padding: '0.75rem', paddingRight: '2.5rem', borderRadius: '0.5rem', border: '1px solid #ccc', boxSizing: 'border-box' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#666', padding: 0 }}
+                        aria-label="Toggle password visibility"
+                      >
+                        {showPassword ? "👁️" : "👁️‍🗨️"}
+                      </button>
+                    </div>
+                    
+                    {isLoginMode && authError && <p style={{ color: 'red', fontSize: '0.875rem' }}>{authError}</p>}
+                    
+                    <button type="submit" className="auth-primary-button" disabled={isLoading} style={{ width: '100%', justifyContent: 'center' }}>
+                      {isLoading && isLoginMode ? "Please wait..." : "Sign In"}
+                    </button>
+                  </form>
 
-              <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.875rem' }}>
-                {isLoginMode ? "Don't have an account? " : "Already have an account? "}
-                <button
-                  type="button"
-                  onClick={() => setIsLoginMode(!isLoginMode)}
-                  style={{ background: 'none', border: 'none', color: '#ffb703', cursor: 'pointer', fontWeight: 'bold' }}
-                >
-                  {isLoginMode ? "Sign Up" : "Sign In"}
-                </button>
+                  <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.875rem' }}>
+                    Don't have an account? 
+                    <button
+                      type="button"
+                      onClick={() => { setIsLoginMode(false); setAuthError(""); }}
+                      style={{ background: 'none', border: 'none', color: '#ffb703', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                       Sign Up
+                    </button>
+                  </div>
+
+                  <div className="auth-features" style={{ marginTop: '2rem' }}>
+                    <div><span>✓</span> Income tracking</div>
+                    <div><span>✓</span> Expense limits</div>
+                    <div><span>✓</span> Monthly reports</div>
+                  </div>
+                </div>
               </div>
 
-              <div className="auth-features" style={{ marginTop: '2rem' }}>
-                <div><span>✓</span> Income tracking</div>
-                <div><span>✓</span> Expense limits</div>
-                <div><span>✓</span> Monthly reports</div>
+              {/* SIGN UP PANEL */}
+              <div style={{ width: '50%', flexShrink: 0, paddingLeft: '1rem', boxSizing: 'border-box' }}>
+                <div className="auth-action-card">
+                  <div className="auth-action-icon">✨</div>
+                  <p className="section-label">JOIN BUDGET BEE</p>
+                  <h2>Create your free account</h2>
+                  
+                  <form onSubmit={(e) => { setIsLoginMode(false); handleSubmit(e); }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem', width: '100%' }}>
+                    <input
+                      type="text"
+                      placeholder="Username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                      style={{ padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #ccc' }}
+                    />
+                    <input
+                      type="email"
+                      placeholder="Email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      style={{ padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid #ccc' }}
+                    />
+                    <div style={{ position: 'relative', width: '100%' }}>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        style={{ width: '100%', padding: '0.75rem', paddingRight: '2.5rem', borderRadius: '0.5rem', border: '1px solid #ccc', boxSizing: 'border-box' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{ position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#666', padding: 0 }}
+                        aria-label="Toggle password visibility"
+                      >
+                        {showPassword ? "👁️" : "👁️‍🗨️"}
+                      </button>
+                    </div>
+                    
+                    {!isLoginMode && authError && <p style={{ color: 'red', fontSize: '0.875rem' }}>{authError}</p>}
+                    
+                    <button type="submit" className="auth-primary-button" disabled={isLoading} style={{ width: '100%', justifyContent: 'center' }}>
+                      {isLoading && !isLoginMode ? "Please wait..." : "Sign Up"}
+                    </button>
+                  </form>
+
+                  <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.875rem' }}>
+                    Already have an account? 
+                    <button
+                      type="button"
+                      onClick={() => { setIsLoginMode(true); setAuthError(""); }}
+                      style={{ background: 'none', border: 'none', color: '#ffb703', cursor: 'pointer', fontWeight: 'bold' }}
+                    >
+                       Sign In
+                    </button>
+                  </div>
+
+                  <div className="auth-features" style={{ marginTop: '2rem' }}>
+                    <div><span>✓</span> Income tracking</div>
+                    <div><span>✓</span> Expense limits</div>
+                    <div><span>✓</span> Monthly reports</div>
+                  </div>
+                </div>
               </div>
             </div>
           ) : (
-            <div className="auth-action-card">
+            <div className="auth-action-card" style={{ width: '100%' }}>
               <div className="auth-action-icon">✓</div>
               <p className="section-label">YOU'RE SIGNED IN</p>
               <h2>Ready to manage your finances?</h2>
